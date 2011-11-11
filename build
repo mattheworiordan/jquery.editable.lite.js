@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+begin
+  require 'rubygems'
+  require 'yui/compressor'
+  require 'zlib'
+rescue LoadError => err
+  puts <<-EOF
+  The YUI compressor gem is required to execute this build script
+  Run: gem yui-compressor.
+EOF
+  exit
+end
+
+puts 'Building minified Javascript'
+
+def minify_js(file_name)
+  compressor = YUI::JavaScriptCompressor.new
+  File.open("#{file_name}.js", 'r') do |source|
+    compressor.compress(source) do |compressed|
+      Zlib::GzipWriter.open("#{file_name}.min.js.gz") do |gzip|
+        File.open("#{file_name}.min.js", 'w') do |min_js|
+          while buffer = compressed.read(4096)
+            min_js.write(buffer)
+            gzip.write(buffer)
+          end
+        end
+        gzip.close
+      end
+    end
+  end
+end
+
+minify_js 'jquery.editable.lite'
+minify_js 'vendor/js/jquery.textarea-expander'

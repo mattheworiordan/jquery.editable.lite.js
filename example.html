@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>JQuery Editable Lite Plugin Example</title>
+  <link rel="stylesheet" type="text/css" href="vendor/css/jquery-ui-1.8.16.custom.css"></link>
+  <script src="vendor/js/jquery.1.6.2.min.js"></script>
+  <script src="vendor/js/jquery-ui-1.8.16.custom.min.js"></script>
+  <script src="vendor/js/jquery.textarea-expander.js"></script>
+  <script src="jquery.editable.lite.js"></script>
+
+	<style>
+	  * { margin: 0; padding: 0; }
+    body {
+      font: 14px Georgia, serif;
+      margin: 10px;
+    }
+    h1 {
+      margin-bottom: 0px;
+    }
+    p.intro {
+      margin-bottom: 30px;
+    }
+    h2, p {
+      margin-bottom: 10px;
+    }
+    #output {
+      border: 1px solid #CCC;
+      min-height: 20px;
+      float: right;
+      width: 300px;
+      height: 400px;
+      overflow: auto;
+      padding: 10px;
+    }
+    #output div {
+      margin-bottom: 10px;
+    }
+    .container {
+      float: left;
+      width: 400px;
+    }
+    .editable:hover {
+      background-color: #FF9;
+    }
+    p.hint {
+      color: #999;
+      margin-top: -5px;
+      font-size: 12px;
+    }
+  </style>
+
+  <script>
+    /* Sample code to set up editable fields */
+    $(function() {
+      // you can change the value after a callback, however you must return the value you want to appear after editing
+      var callback = function(value) {
+        $('#output h2').after($('<div>').text('Changed callback: ' + value));
+        return value;
+      }
+      // you can optionally change the value before editing, good example would be editing a currency field and removing the currency symbol first
+      var beforeCallback = function(value) {
+        $('#output h2').after($('<div>').text('Before callback: ' + value));
+        return 'a';
+      }
+
+      $('.editable.single').editable(callback);
+      $('.editable.text-area').editable(callback, { type: 'textarea' });
+      $('.editable.text-area-expandable').editable(callback, { type: 'textarea', autoResize: true });
+      $('.editable.autocomplete').editable(callback, { data: beforeCallback, autoComplete: ['alpha','apple','arid','austerity','beta','cat','dog','elephant'] });
+    });
+  </script>
+</head>
+
+<body>
+
+  <div id="output">
+    <h2>Debugging messages</h2>
+  </div>
+
+  <h1>JQuery Editable Lite Plugin Example</h1>
+  <p class="intro">The fields below are editable, simply click on them to activate them.</p>
+
+  <div class="container">
+    <h2 class="editable single">Heading field - single line editable</h2>
+    <p class="editable text-area">Paragraph field with text area editable (no automatic resize)</p>
+    <p class="editable text-area-expandable">Paragraph field with expandable text area editable (automatic resize)</p>
+    <p class="editable autocomplete">Single field with JQuery UI autocomplete plugged in</p>
+    <p class="hint">Press the down arrow key once you edit the field above</p>
+  </div>
+
+</body>
