@@ -194,7 +194,7 @@
           if ($(elem).height() > targetProps.inputHeight) {
             // textarea has expanded vertically
             // in Firefox the textarea is cropped to the parent element, so we need to expand the parent element to allow for the expanded textarea
-            $(target).css('height', (targetProps.height + $(elem).height() - targetProps.inputHeight) + 'px');
+            $(target).css('height', (targetProps.height + $(elem).height() - targetProps.inputHeight + 10) + 'px');
           }
         }
       });
