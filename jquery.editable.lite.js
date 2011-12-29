@@ -31,6 +31,7 @@
  * - offsetY: 0, // move textarea Y pixels from calculated position
  * - assumedBorderWidth: 4, // border width of input field allowed for in width calculations
  * - displayDelay: 50 // optional delay before displaying the text field, sometimes useful if GUI is changing just as user clicks on editable field
+ * - zIndex: 10000 // zIndex for the input, defaults to a ridiculously high number
  *
  * Command usage example:
  *   $('div').editable(valueChangedCallback);
@@ -79,6 +80,7 @@
       // store attributes from target before we modify it
       targetProps.style = $(target).attr('style');
       targetProps.text = multiLineHtmlDecode($(target).html()); // convert HTML br tags to line breaks
+      targetProps.height = $(target).outerHeight();
       inputText = targetProps.text;
 
       // if data callback exists then get the value for this field from that callback
@@ -88,7 +90,7 @@
         inputText = options.data;
       }
 
-      form = $('<form>');
+      form = $('<form class="editable-lite-form">');
       elem = editableFieldFactory(options.type, target); // get the text type field based on the options passed in
 
       // now set font characteristics
@@ -119,7 +121,7 @@
         .css('margin', '0').css('padding', '0')
         .css('top', options.offsetY + $(target).position().top + 'px')
         .css('left', options.offsetY + $(positioningSpan).position().left + 'px')
-        .css('z-index', 10000)
+        .css('z-index', options.zIndex)
         .append(elem);
 
       // calculate offset of positionSpan to left hand side of node so we can reduce the width of the editable text field
@@ -138,9 +140,14 @@
       $(target).css('height', $(target).height() + 'px').text('');
 
       $(target).append(form); // add the form inside this element
+      setTimeout(function() { // wait for browser to render
+        targetProps.inputHeight = $(elem).height(); // store the textarea height in case it expands
+      }, 1);
+
+      $(elem).focus();
 
       // add event handler to fire if user moves away
-      $(elem).blur(function() {
+      $(elem).blur(function(event) {
         if (!eventAlreadyProcessed) { // if blurring as a result of a key press, then allow this blur event to be ignored
           eventAlreadyProcessed = true;
           if (options.acceptChangesOnBlur) {
@@ -183,9 +190,14 @@
             saveChanges();
           }
         }
+        if (!eventAlreadyProcessed && (options.type === 'textarea') && (options.autoResize)) {
+          if ($(elem).height() > targetProps.inputHeight) {
+            // textarea has expanded vertically
+            // in Firefox the textarea is cropped to the parent element, so we need to expand the parent element to allow for the expanded textarea
+            $(target).css('height', (targetProps.height + $(elem).height() - targetProps.inputHeight) + 'px');
+          }
+        }
       });
-
-      $(elem).focus();
     };
 
     editableFieldFactory = function(type, target) {
@@ -220,13 +232,16 @@
 
       // save value to target HTML element, but keep form visible so append to the HTML
       $(target).attr('style', targetProps.style || '').html(encodedVal).append(form);
+      // restore height as it may be changed as textarea expands vertically
+      // if ((options.type === 'textarea') && (options.autoResize)) { $(target).css('height', ''); }
       $(target).data('editable-active', false);
 
       // pause before we remove the element as other events may need to access this element before it disappears
       setTimeout(function() {
-        form.remove();
+        form.hide().remove();
+        $(target).find('form.editable-lite-form').remove(); // odd bug where a blank form was appearing, had to manually remove any forms matching the class
         addPlaceHolderIfEmpty();
-      }, 10);
+      }, 20);
 
       // if user wants a callback even if there was no change, then call this now
       if ((typeof newVal === 'undefined') && (typeof options.noChange === 'function')) {
@@ -351,6 +366,7 @@
     autoResizeMax: 300, // set max height autoResize field can expand to,
     noChange: false, // callback that will be made even if no change was made to the input field, by default no call is made
     placeHolder: false, // allows HTML to be placed inside the target when empty such as [click here to edit]
-    autoComplete: false // allows use of JQuery UI autoComplete plugin, pass in an array or function to return an array of data
+    autoComplete: false, // allows use of JQuery UI autoComplete plugin, pass in an array or function to return an array of data
+    zIndex: 10000 // zIndex for the input, defaults to a ridiculously high number
   };
 }(jQuery));
