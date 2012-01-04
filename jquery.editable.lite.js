@@ -189,10 +189,10 @@
             }
           } else if (event.which === 27) { // escape key
             eventAlreadyProcessed = true;
-            restoreTarget();
+            setTimeout(restoreTarget, 1); // wait for option keydown event callback to fire first before modifying the DOM
           } else if (event.which === 9) { // tab
             eventAlreadyProcessed = true;
-            saveChanges();
+            setTimeout(saveChanges, 1); // wait for option keydown event callback to fire first before modifying the DOM
           }
         }
         if (!eventAlreadyProcessed && (options.type === 'textarea') && (options.autoResize)) {
