@@ -74,10 +74,10 @@
     /*
      * Functions
      */
-
     showEditableField = function(evt) {
       var getBackgroundColor, positioningSpan, offsetBy, inputText,
           eventAlreadyProcessed = false, // multiple keydown events are sometimes fired, ensure we only deal with the first valid one
+          caretPosition = getCaretPosition(),
           relayEvents, assignBinding, repositionCallback;
 
       stripPlaceHolder();
@@ -136,7 +136,7 @@
           form.css('top', options.offsetY + $(target).position().top + 'px');
           setTimeout(repositionCallback, 250);
         }
-      }
+      };
       repositionCallback();
 
       // calculate offset of positionSpan to left hand side of node so we can reduce the width of the editable text field
@@ -160,6 +160,7 @@
       }, 1);
 
       $(elem).focus();
+      setCaretPosition(elem[0], caretPosition);
 
       // add event handler to fire if user moves away
       $(elem).blur(function(event) {
@@ -387,6 +388,28 @@
     html = $.map(html, function(htmlFragment) { return $('<span/>').html(htmlFragment).text(); }).join('\n');
     return html;
   };
+
+  function getCaretPosition(){
+    return window.getSelection().focusOffset;
+  }
+  function setCaretPosition(elem, caretPos) {
+    if(elem !== null) {
+        if(elem.createTextRange) {
+            var range = elem.createTextRange();
+            range.move('character', caretPos);
+            range.select();
+        }
+        else {
+            if(typeof elem.selectionStart !== 'undefined') {
+                elem.focus();
+                elem.setSelectionRange(caretPos, caretPos);
+            }
+            else {
+                elem.focus();
+            }
+        }
+    }
+}
   //
   // plugin defaults
   //
