@@ -390,19 +390,23 @@
   };
 
   function getCaretPosition(){
-    return window.getSelection().focusOffset;
+    var sel = window.getSelection();
+    return {
+      from: sel.anchorOffset,
+      to: sel.focusOffset
+    };
   }
-  function setCaretPosition(elem, caretPos) {
+  function setCaretPosition(elem, sel) {
     if(elem !== null) {
         if(elem.createTextRange) {
             var range = elem.createTextRange();
-            range.move('character', caretPos);
+            range.move('character', sel.to);
             range.select();
         }
         else {
             if(typeof elem.selectionStart !== 'undefined') {
                 elem.focus();
-                elem.setSelectionRange(caretPos, caretPos);
+                elem.setSelectionRange(sel.from, sel.to);
             }
             else {
                 elem.focus();
